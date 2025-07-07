@@ -17,7 +17,7 @@ export interface Database {
           description: string
           date: string
           image_url: string
-          isPast: boolean | null
+          is_Past: boolean | null
         }
         Insert: {
           id?: number
@@ -26,7 +26,7 @@ export interface Database {
           description: string
           date: string
           image_url: string
-          isPast?: boolean | null
+          is_Past?: boolean | null
         }
         Update: {
           id?: number
@@ -35,7 +35,7 @@ export interface Database {
           description?: string
           date?: string
           image_url?: string
-          isPast?: boolean | null
+          is_Past?: boolean | null
         }
         Relationships: []
       }
