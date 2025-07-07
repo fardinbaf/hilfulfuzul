@@ -30,6 +30,9 @@ interface DataContextType {
   setMembers: (members: Member[]) => void;
   slides: Slide[];
   setSlides: (slides: Slide[]) => void;
+  isAuthenticated: boolean;
+  login: (username: string, password: string) => Promise<boolean>;
+  logout: () => void;
 }
 
 // Initial Data
@@ -102,6 +105,22 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [marqueeText, setMarqueeText] = useState<string[]>(initialMarqueeText);
   const [members, setMembers] = useState<Member[]>(initialMembers);
   const [slides, setSlides] = useState<Slide[]>(initialSlides);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!sessionStorage.getItem('hilful_auth'));
+
+  const login = async (username: string, password: string): Promise<boolean> => {
+    // NOTE: Replace with a secure authentication method (e.g., API call) in production.
+    if (username === 'admin' && password === 'admin123') {
+      sessionStorage.setItem('hilful_auth', 'true');
+      setIsAuthenticated(true);
+      return true;
+    }
+    return false;
+  };
+
+  const logout = () => {
+    sessionStorage.removeItem('hilful_auth');
+    setIsAuthenticated(false);
+  };
 
   const value = {
     events,
@@ -112,6 +131,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setMembers,
     slides,
     setSlides,
+    isAuthenticated,
+    login,
+    logout,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
