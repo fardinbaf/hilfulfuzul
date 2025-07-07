@@ -1,8 +1,13 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { supabase } from '../supabaseClient';
+import { Session } from '@supabase/supabase-js';
+import { toast } from 'react-hot-toast';
+
 
 // Interfaces
 export interface Event {
   id: number;
+  created_at?: string;
   title: string;
   description: string;
   date: string;
@@ -11,129 +16,201 @@ export interface Event {
 }
 
 export interface Slide {
+  id: number;
+  created_at?: string;
   url: string;
   caption: string;
 }
 
 export interface Member {
   id: number;
+  created_at?: string;
   name: string;
   phone: string;
 }
 
-interface DataContextType {
-  events: Event[];
-  setEvents: (events: Event[]) => void;
-  marqueeText: string[];
-  setMarqueeText: (text: string[]) => void;
-  members: Member[];
-  setMembers: (members: Member[]) => void;
-  slides: Slide[];
-  setSlides: (slides: Slide[]) => void;
-  isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+export interface Marquee {
+    id: number;
+    created_at?: string;
+    text_content: string;
 }
 
-// Initial Data
-const initialEvents: Event[] = [
-    {
-      id: 1,
-      title: "ঈদুল আযহা ২০২৩ খাদ্য বিতরণ",
-      description: "গত ঈদুল আযহা উপলক্ষে ৩০টি পরিবারের মাঝে খাদ্য সামগ্রী বিতরণ করা হয়েছে।",
-      date: "2023-06-28",
-      image_url: "https://images4.imagebam.com/4f/ed/1e/ME11IW66_o.jpeg",
-      isPast: true,
-    },
-    {
-      id: 2,
-      title: "রমজান ২০২৩ ইফতার বিতরণ",
-      description: "রমজান মাসে প্রতিদিন 17 টি পরিবারের মাঝে ইফতার বিতরণ করা হয়েছে।",
-      date: "2023-04-15",
-      image_url: "https://images4.imagebam.com/10/3e/d4/ME11IW7V_o.jpeg",
-      isPast: true,
-    },
-    {
-      id: 3,
-      title: "ঈদুল ফিতর ২০২২ সেমাই বিতরণ",
-      description: "ঈদুল ফিতর উপলক্ষে ১০০টি পরিবারের মাঝে সেমাই ও চিনি বিতরণ করা হয়েছে।",
-      date: "2022-05-02",
-      image_url: "https://images4.imagebam.com/18/ff/0f/ME11IW67_o.jpeg",
-      isPast: true,
-    }
-];
-
-const initialMarqueeText: string[] = [
-    "আগামী ঈদ-উল-আজহা উপলক্ষে অনুদান সংগ্রহ চলছে। যোগাযোগ করুন: +880 9696-290209 | আমাদের Whatsapp গ্রুপে যোগ দিতে, নিচের লিঙ্কে ক্লিক করুন। আপনার পণ্য বা সেবার বিজ্ঞাপন দিতে যোগাযোগ করুন。"
-];
-
-const initialSlides: Slide[] = [
-    {
-        url: "https://images.pexels.com/photos/6646918/pexels-photo-6646918.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-        caption: "Together We Can Make a Difference"
-    },
-    {
-        url: "https://images4.imagebam.com/10/3e/d4/ME11IW7V_o.jpeg",
-        caption: "Bringing Hope to Those in Need"
-    },
-    {
-        url: "https://images4.imagebam.com/0b/da/cc/ME11EGOJ_o.jpg",
-        caption: "Supporting Communities During Eid"
-    }
-];
-
-const initialMembers: Member[] = [
-  { id: 1, name: 'Fardin Islam', phone: '+8801...'},
-  { id: 2, name: 'Md Shohag Hossain', phone: '+8801...'},
-  { id: 3, name: 'Md Juel Hossain', phone: '+8801...'},
-  { id: 4, name: 'Md Nahid Hossain', phone: '+8801...'},
-  { id: 5, name: 'Md A. Ahad', phone: '+8801...'},
-  { id: 6, name: 'Saimon Siddique', phone: '+8801...'},
-  { id: 7, name: 'Abu Sufian', phone: '+8801...'},
-  { id: 8, name: 'Nayeem Islam', phone: '+8801...'},
-  { id: 9, name: 'Al Amin Hossain', phone: '+8801...'},
-  { id: 10, name: 'Hridoy Ahmed', phone: '+8801...'},
-  { id: 11, name: 'Sakib Al Hasan', phone: '+8801...'},
-  { id: 12, name: 'Mushfiqur Rahim', phone: '+8801...'},
-];
+interface DataContextType {
+  events: Event[];
+  marqueeText: Marquee[];
+  members: Member[];
+  slides: Slide[];
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  addEvent: (event: Omit<Event, 'id' | 'created_at'>) => Promise<void>;
+  updateEvent: (id: number, event: Omit<Event, 'id' | 'created_at'>) => Promise<void>;
+  deleteEvent: (id: number) => Promise<void>;
+  addMember: (member: Omit<Member, 'id' | 'created_at'>) => Promise<void>;
+  updateMember: (id: number, member: Omit<Member, 'id' | 'created_at'>) => Promise<void>;
+  deleteMember: (id: number) => Promise<void>;
+  addSlide: (slide: Omit<Slide, 'id' | 'created_at'>) => Promise<void>;
+  updateSlide: (id: number, slide: Omit<Slide, 'id' | 'created_at'>) => Promise<void>;
+  deleteSlide: (id: number) => Promise<void>;
+  updateMarqueeText: (texts: Marquee[]) => Promise<void>;
+}
 
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-  const [events, setEvents] = useState<Event[]>(initialEvents);
-  const [marqueeText, setMarqueeText] = useState<string[]>(initialMarqueeText);
-  const [members, setMembers] = useState<Member[]>(initialMembers);
-  const [slides, setSlides] = useState<Slide[]>(initialSlides);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!sessionStorage.getItem('hilful_auth'));
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [marqueeText, setMarqueeText] = useState<Marquee[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [slides, setSlides] = useState<Slide[]>([]);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    // NOTE: Replace with a secure authentication method (e.g., API call) in production.
-    if (username === 'admin' && password === 'admin123') {
-      sessionStorage.setItem('hilful_auth', 'true');
-      setIsAuthenticated(true);
-      return true;
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+        const fetchEvents = supabase.from('events').select('*').order('date', { ascending: false });
+        const fetchMarquee = supabase.from('marquee_text').select('*');
+        const fetchMembers = supabase.from('members').select('*').order('name', { ascending: true });
+        const fetchSlides = supabase.from('slides').select('*');
+
+        const [eventsRes, marqueeRes, membersRes, slidesRes] = await Promise.all([fetchEvents, fetchMarquee, fetchMembers, fetchSlides]);
+
+        if (eventsRes.error) throw eventsRes.error;
+        setEvents(eventsRes.data);
+        
+        if (marqueeRes.error) throw marqueeRes.error;
+        setMarqueeText(marqueeRes.data);
+        
+        if (membersRes.error) throw membersRes.error;
+        setMembers(membersRes.data);
+
+        if (slidesRes.error) throw slidesRes.error;
+        setSlides(slidesRes.data);
+    } catch (error: any) {
+        toast.error(`Error fetching data: ${error.message}`);
+    } finally {
+        setIsLoading(false);
     }
-    return false;
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Auth methods
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   };
 
-  const logout = () => {
-    sessionStorage.removeItem('hilful_auth');
-    setIsAuthenticated(false);
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   };
+
+  // Event methods
+  const addEvent = async (event: Omit<Event, 'id' | 'created_at'>) => {
+    const { error } = await supabase.from('events').insert(event);
+    if (error) throw error;
+    await fetchData();
+  };
+  const updateEvent = async (id: number, event: Omit<Event, 'id' | 'created_at'>) => {
+    const { error } = await supabase.from('events').update(event).eq('id', id);
+    if (error) throw error;
+    await fetchData();
+  };
+  const deleteEvent = async (id: number) => {
+    const { error } = await supabase.from('events').delete().eq('id', id);
+    if (error) throw error;
+    await fetchData();
+  };
+
+  // Member methods
+  const addMember = async (member: Omit<Member, 'id' | 'created_at'>) => {
+    const { error } = await supabase.from('members').insert(member);
+    if (error) throw error;
+    await fetchData();
+  };
+  const updateMember = async (id: number, member: Omit<Member, 'id'| 'created_at'>) => {
+    const { error } = await supabase.from('members').update(member).eq('id', id);
+    if (error) throw error;
+    await fetchData();
+  };
+  const deleteMember = async (id: number) => {
+    const { error } = await supabase.from('members').delete().eq('id', id);
+    if (error) throw error;
+    await fetchData();
+  };
+
+  // Slide methods
+  const addSlide = async (slide: Omit<Slide, 'id'| 'created_at'>) => {
+    const { error } = await supabase.from('slides').insert(slide);
+    if (error) throw error;
+    await fetchData();
+  };
+  const updateSlide = async (id: number, slide: Omit<Slide, 'id'| 'created_at'>) => {
+    const { error } = await supabase.from('slides').update(slide).eq('id', id);
+    if (error) throw error;
+    await fetchData();
+  };
+  const deleteSlide = async (id: number) => {
+    const { error } = await supabase.from('slides').delete().eq('id', id);
+    if (error) throw error;
+    await fetchData();
+  };
+  
+  // Marquee methods
+  const updateMarqueeText = async (newTexts: Marquee[]) => {
+      // Delete all existing marquee texts
+      const existingIds = marqueeText.map(m => m.id);
+      if(existingIds.length > 0) {
+        const { error: deleteError } = await supabase.from('marquee_text').delete().in('id', existingIds);
+        if (deleteError) throw deleteError;
+      }
+      
+      // Insert new ones
+      const newMarqueeData = newTexts.map(t => ({ text_content: t.text_content }));
+      if(newMarqueeData.length > 0) {
+        const { error: insertError } = await supabase.from('marquee_text').insert(newMarqueeData);
+        if (insertError) throw insertError;
+      }
+      await fetchData();
+  };
+
 
   const value = {
     events,
-    setEvents,
     marqueeText,
-    setMarqueeText,
     members,
-    setMembers,
     slides,
-    setSlides,
-    isAuthenticated,
+    isAuthenticated: !!session,
+    isLoading,
     login,
     logout,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+    addMember,
+    updateMember,
+    deleteMember,
+    addSlide,
+    updateSlide,
+    deleteSlide,
+    updateMarqueeText
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
