@@ -27,10 +27,10 @@ const RecentEvents = () => {
                   <Calendar size={16} className="mr-2" />
                   <span className="text-sm">{new Date(event.date).toLocaleDateString()}</span>
                 </div>
-                <h3 className={`text-xl font-bold text-gray-800 mb-2 ${event.isPast ? 'line-through' : ''}`}>
+                <h3 className={`text-xl font-bold text-gray-800 mb-2 ${event.is_past ? 'line-through' : ''}`}>
                   {event.title}
                 </h3>
-                <p className={`text-gray-600 ${event.isPast ? 'line-through' : ''}`}>
+                <p className={`text-gray-600 ${event.is_past ? 'line-through' : ''}`}>
                   {event.description}
                 </p>
               </div>
