@@ -10,7 +10,7 @@ const EventNotice = () => {
     if (notices.length === 0) return;
     const interval = setInterval(() => {
       setCurrentNoticeIndex((prevIndex) => (prevIndex + 1) % notices.length);
-    }, 30000);
+    }, 30000); // Change notice every 30 seconds
 
     return () => clearInterval(interval);
   }, [notices.length]);
@@ -24,7 +24,7 @@ const EventNotice = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-center overflow-hidden">
           <div className="whitespace-nowrap animate-marquee">
-            {notices[currentNoticeIndex]}
+            {notices[currentNoticeIndex].text_content}
           </div>
         </div>
       </div>
