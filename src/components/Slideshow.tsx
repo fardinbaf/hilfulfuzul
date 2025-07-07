@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SlideshowProps {
   images: Array<{
+    id: number;
     url: string;
     caption: string;
   }>;
@@ -14,12 +15,14 @@ const Slideshow = ({ images, autoplaySpeed = 5000 }: SlideshowProps) => {
   const [isHovering, setIsHovering] = useState(false);
 
   const nextSlide = useCallback(() => {
+    if (images.length === 0) return;
     setCurrentIndex((prevIndex) => 
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
     );
   }, [images.length]);
 
   const prevSlide = () => {
+    if (images.length === 0) return;
     setCurrentIndex((prevIndex) => 
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
     );
@@ -30,14 +33,22 @@ const Slideshow = ({ images, autoplaySpeed = 5000 }: SlideshowProps) => {
   };
 
   useEffect(() => {
-    if (isHovering) return;
+    if (isHovering || images.length < 2) return;
     
     const interval = setInterval(() => {
       nextSlide();
     }, autoplaySpeed);
     
     return () => clearInterval(interval);
-  }, [nextSlide, autoplaySpeed, isHovering]);
+  }, [nextSlide, autoplaySpeed, isHovering, images.length]);
+
+  if (images.length === 0) {
+    return (
+        <div className="relative h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden bg-gray-200 flex items-center justify-center">
+            <p className="text-gray-500">No slides available.</p>
+        </div>
+    );
+  }
 
   return (
     <div 
@@ -47,7 +58,7 @@ const Slideshow = ({ images, autoplaySpeed = 5000 }: SlideshowProps) => {
     >
       {images.map((image, index) => (
         <div
-          key={index}
+          key={image.id}
           className={`absolute inset-0 transition-opacity duration-1000 ${
             index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
@@ -64,36 +75,40 @@ const Slideshow = ({ images, autoplaySpeed = 5000 }: SlideshowProps) => {
         </div>
       ))}
       
-      <button
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-40 rounded-full p-2 text-white transition-all duration-300"
-        onClick={prevSlide}
-        aria-label="Previous slide"
-      >
-        <ChevronLeft size={24} />
-      </button>
-      
-      <button
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-40 rounded-full p-2 text-white transition-all duration-300"
-        onClick={nextSlide}
-        aria-label="Next slide"
-      >
-        <ChevronRight size={24} />
-      </button>
-      
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentIndex 
-                ? 'bg-white scale-110' 
-                : 'bg-white bg-opacity-50 hover:bg-opacity-75'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      {images.length > 1 && (
+        <>
+            <button
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-40 rounded-full p-2 text-white transition-all duration-300"
+                onClick={prevSlide}
+                aria-label="Previous slide"
+            >
+                <ChevronLeft size={24} />
+            </button>
+            
+            <button
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-40 rounded-full p-2 text-white transition-all duration-300"
+                onClick={nextSlide}
+                aria-label="Next slide"
+            >
+                <ChevronRight size={24} />
+            </button>
+            
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                {images.map((_, index) => (
+                <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentIndex 
+                        ? 'bg-white scale-110' 
+                        : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                />
+                ))}
+            </div>
+        </>
+      )}
     </div>
   );
 };
