@@ -1,0 +1,8 @@
+/* 
+Create a file named "netlify.toml" in the root of your project with the following content:
+*/
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
