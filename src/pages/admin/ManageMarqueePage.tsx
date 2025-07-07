@@ -28,7 +28,7 @@ const ManageMarqueePage = () => {
   };
 
   const addText = () => {
-    setTexts([...texts, { id: Date.now(), text_content: '' }]); // Temporary ID
+    setTexts([...texts, { id: Date.now(), created_at: new Date().toISOString(), text_content: '' }]); // Temporary ID
   };
 
   const removeText = (index: number) => {
