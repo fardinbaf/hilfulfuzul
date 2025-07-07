@@ -74,8 +74,8 @@ const ManageEventsPage = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{event.date}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${event.isPast ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                    {event.isPast ? 'Past' : 'Upcoming'}
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${event.is_past ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                    {event.is_past ? 'Past' : 'Upcoming'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -99,7 +99,7 @@ const EventModal = ({ event, onSave, onClose }: { event: Event | null, onSave: (
         description: event?.description || '',
         date: event?.date || '',
         image_url: event?.image_url || '',
-        isPast: event?.isPast || false,
+        is_past: event?.is_past || false,
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
