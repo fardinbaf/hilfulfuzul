@@ -1,24 +1,34 @@
-import { useState } from 'react';
-import { useData } from '../../context/DataContext';
+import { useState, useEffect } from 'react';
+import { useData, Marquee } from '../../context/DataContext';
 import { Plus, Trash2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const ManageMarqueePage = () => {
-  const { marqueeText, setMarqueeText } = useData();
-  const [texts, setTexts] = useState([...marqueeText]);
+  const { marqueeText, updateMarqueeText } = useData();
+  const [texts, setTexts] = useState<Marquee[]>([]);
 
-  const handleSave = () => {
-    setMarqueeText(texts.filter(t => t.trim() !== ''));
-    alert('Marquee text updated successfully!');
+  useEffect(() => {
+    setTexts([...marqueeText]);
+  }, [marqueeText]);
+
+
+  const handleSave = async () => {
+    const promise = updateMarqueeText(texts.filter(t => t.text_content.trim() !== ''));
+    toast.promise(promise, {
+        loading: 'Updating marquee text...',
+        success: 'Marquee text updated successfully!',
+        error: 'Failed to update marquee text.',
+    });
   };
 
   const handleChange = (index: number, value: string) => {
     const newTexts = [...texts];
-    newTexts[index] = value;
+    newTexts[index] = {...newTexts[index], text_content: value};
     setTexts(newTexts);
   };
 
   const addText = () => {
-    setTexts([...texts, '']);
+    setTexts([...texts, { id: Date.now(), text_content: '' }]); // Temporary ID
   };
 
   const removeText = (index: number) => {
@@ -40,11 +50,11 @@ const ManageMarqueePage = () => {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="space-y-4">
           {texts.map((text, index) => (
-            <div key={index} className="flex items-center space-x-2">
+            <div key={text.id} className="flex items-center space-x-2">
               <textarea
                 rows={2}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                value={text}
+                value={text.text_content}
                 onChange={(e) => handleChange(index, e.target.value)}
               />
               <button onClick={() => removeText(index)} className="text-red-500 hover:text-red-700 p-2">
