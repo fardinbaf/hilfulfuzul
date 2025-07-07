@@ -1,39 +1,47 @@
 import { useState } from 'react';
 import { useData, Slide } from '../../context/DataContext';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+
+type SlideFormData = Omit<Slide, 'id' | 'created_at'>;
 
 const ManageSlidesPage = () => {
-  const { slides, setSlides } = useData();
+  const { slides, addSlide, updateSlide, deleteSlide } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState<Slide | null>(null);
-  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 
-  const openModal = (slide: Slide | null = null, index: number | null = null) => {
+  const openModal = (slide: Slide | null = null) => {
     setCurrentSlide(slide);
-    setCurrentIndex(index);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setCurrentSlide(null);
-    setCurrentIndex(null);
   };
 
-  const handleSave = (slideData: Slide) => {
-    if (currentSlide && currentIndex !== null) {
-        const newSlides = [...slides];
-        newSlides[currentIndex] = slideData;
-        setSlides(newSlides);
-    } else {
-      setSlides([...slides, slideData]);
-    }
-    closeModal();
+  const handleSave = async (slideData: SlideFormData) => {
+    const promise = currentSlide
+      ? updateSlide(currentSlide.id, slideData)
+      : addSlide(slideData);
+    
+    toast.promise(promise, {
+      loading: 'Saving slide...',
+      success: `Slide ${currentSlide ? 'updated' : 'added'} successfully!`,
+      error: 'Failed to save slide.',
+    });
+    
+    promise.then(closeModal).catch(() => {});
   };
 
-  const handleDelete = (index: number) => {
+  const handleDelete = (id: number) => {
     if (window.confirm('Are you sure you want to delete this slide?')) {
-      setSlides(slides.filter((_, i) => i !== index));
+      const promise = deleteSlide(id);
+      toast.promise(promise, {
+        loading: 'Deleting slide...',
+        success: 'Slide deleted successfully!',
+        error: 'Failed to delete slide.',
+      });
     }
   };
 
@@ -57,15 +65,15 @@ const ManageSlidesPage = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {slides.map((slide, index) => (
-              <tr key={index}>
+            {slides.map((slide) => (
+              <tr key={slide.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                     <img src={slide.url} alt={slide.caption} className="h-12 w-20 object-cover rounded"/>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{slide.caption}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button onClick={() => openModal(slide, index)} className="text-emerald-600 hover:text-emerald-900 mr-4"><Edit size={18} /></button>
-                  <button onClick={() => handleDelete(index)} className="text-red-600 hover:text-red-900"><Trash2 size={18} /></button>
+                  <button onClick={() => openModal(slide)} className="text-emerald-600 hover:text-emerald-900 mr-4"><Edit size={18} /></button>
+                  <button onClick={() => handleDelete(slide.id)} className="text-red-600 hover:text-red-900"><Trash2 size={18} /></button>
                 </td>
               </tr>
             ))}
@@ -78,8 +86,8 @@ const ManageSlidesPage = () => {
   );
 };
 
-const SlideModal = ({ slide, onSave, onClose }: { slide: Slide | null, onSave: (data: Slide) => void, onClose: () => void }) => {
-    const [formData, setFormData] = useState({
+const SlideModal = ({ slide, onSave, onClose }: { slide: Slide | null, onSave: (data: SlideFormData) => void, onClose: () => void }) => {
+    const [formData, setFormData] = useState<SlideFormData>({
         url: slide?.url || '',
         caption: slide?.caption || '',
     });
