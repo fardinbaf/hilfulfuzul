@@ -123,7 +123,7 @@ const EventModal = ({ event, onSave, onClose }: { event: Event | null, onSave: (
                     <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full p-2 border rounded" required />
                     <input type="text" name="image_url" value={formData.image_url} onChange={handleChange} placeholder="Image URL" className="w-full p-2 border rounded" required />
                     <label className="flex items-center">
-                        <input type="checkbox" name="isPast" checked={formData.isPast} onChange={handleChange} className="mr-2" />
+                        <input type="checkbox" name="isPast" checked={formData.isPast || false} onChange={handleChange} className="mr-2" />
                         Is this a past event?
                     </label>
                     <div className="flex justify-end space-x-4">
