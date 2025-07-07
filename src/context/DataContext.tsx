@@ -2,38 +2,23 @@ import { createContext, useContext, useState, ReactNode, useEffect, useCallback 
 import { supabase } from '../supabaseClient';
 import { Session } from '@supabase/supabase-js';
 import { toast } from 'react-hot-toast';
+import { Database } from '../database.types';
 
 
 // Interfaces
-export interface Event {
-  id: number;
-  created_at: string;
-  title: string;
-  description: string;
-  date: string;
-  image_url: string;
-  isPast: boolean | null;
-}
+export type Event = Database['public']['Tables']['events']['Row'];
+export type Slide = Database['public']['Tables']['slides']['Row'];
+export type Member = Database['public']['Tables']['members']['Row'];
+export type Marquee = Database['public']['Tables']['marquee_text']['Row'];
 
-export interface Slide {
-  id: number;
-  created_at: string;
-  url: string;
-  caption: string;
-}
+type EventInsert = Database['public']['Tables']['events']['Insert'];
+type EventUpdate = Database['public']['Tables']['events']['Update'];
+type MemberInsert = Database['public']['Tables']['members']['Insert'];
+type MemberUpdate = Database['public']['Tables']['members']['Update'];
+type SlideInsert = Database['public']['Tables']['slides']['Insert'];
+type SlideUpdate = Database['public']['Tables']['slides']['Update'];
+type MarqueeInsert = Database['public']['Tables']['marquee_text']['Insert'];
 
-export interface Member {
-  id: number;
-  created_at: string;
-  name: string;
-  phone: string;
-}
-
-export interface Marquee {
-    id: number;
-    created_at: string;
-    text_content: string;
-}
 
 interface DataContextType {
   events: Event[];
@@ -44,14 +29,14 @@ interface DataContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  addEvent: (event: Omit<Event, 'id' | 'created_at'>) => Promise<void>;
-  updateEvent: (id: number, event: Omit<Event, 'id' | 'created_at'>) => Promise<void>;
+  addEvent: (event: EventInsert) => Promise<void>;
+  updateEvent: (id: number, event: EventUpdate) => Promise<void>;
   deleteEvent: (id: number) => Promise<void>;
-  addMember: (member: Omit<Member, 'id' | 'created_at'>) => Promise<void>;
-  updateMember: (id: number, member: Omit<Member, 'id' | 'created_at'>) => Promise<void>;
+  addMember: (member: MemberInsert) => Promise<void>;
+  updateMember: (id: number, member: MemberUpdate) => Promise<void>;
   deleteMember: (id: number) => Promise<void>;
-  addSlide: (slide: Omit<Slide, 'id' | 'created_at'>) => Promise<void>;
-  updateSlide: (id: number, slide: Omit<Slide, 'id' | 'created_at'>) => Promise<void>;
+  addSlide: (slide: SlideInsert) => Promise<void>;
+  updateSlide: (id: number, slide: SlideUpdate) => Promise<void>;
   deleteSlide: (id: number) => Promise<void>;
   updateMarqueeText: (texts: Marquee[]) => Promise<void>;
 }
@@ -123,12 +108,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Event methods
-  const addEvent = async (event: Omit<Event, 'id' | 'created_at'>) => {
+  const addEvent = async (event: EventInsert) => {
     const { error } = await supabase.from('events').insert([event]);
     if (error) throw error;
     await fetchData();
   };
-  const updateEvent = async (id: number, event: Omit<Event, 'id' | 'created_at'>) => {
+  const updateEvent = async (id: number, event: EventUpdate) => {
     const { error } = await supabase.from('events').update(event).eq('id', id);
     if (error) throw error;
     await fetchData();
@@ -140,12 +125,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Member methods
-  const addMember = async (member: Omit<Member, 'id' | 'created_at'>) => {
+  const addMember = async (member: MemberInsert) => {
     const { error } = await supabase.from('members').insert([member]);
     if (error) throw error;
     await fetchData();
   };
-  const updateMember = async (id: number, member: Omit<Member, 'id' | 'created_at'>) => {
+  const updateMember = async (id: number, member: MemberUpdate) => {
     const { error } = await supabase.from('members').update(member).eq('id', id);
     if (error) throw error;
     await fetchData();
@@ -157,12 +142,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Slide methods
-  const addSlide = async (slide: Omit<Slide, 'id'| 'created_at'>) => {
+  const addSlide = async (slide: SlideInsert) => {
     const { error } = await supabase.from('slides').insert([slide]);
     if (error) throw error;
     await fetchData();
   };
-  const updateSlide = async (id: number, slide: Omit<Slide, 'id' | 'created_at'>) => {
+  const updateSlide = async (id: number, slide: SlideUpdate) => {
     const { error } = await supabase.from('slides').update(slide).eq('id', id);
     if (error) throw error;
     await fetchData();
@@ -183,7 +168,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Insert new ones
-      const newMarqueeData = newTexts.map(t => ({ text_content: t.text_content }));
+      const newMarqueeData: MarqueeInsert[] = newTexts.map(t => ({ text_content: t.text_content }));
       if(newMarqueeData.length > 0) {
         const { error: insertError } = await supabase.from('marquee_text').insert(newMarqueeData);
         if (insertError) throw insertError;
