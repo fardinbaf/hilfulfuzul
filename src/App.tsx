@@ -11,6 +11,7 @@ import ManageEventsPage from './pages/admin/ManageEventsPage';
 import ManageMarqueePage from './pages/admin/ManageMarqueePage';
 import ManageMembersPage from './pages/admin/ManageMembersPage';
 import ManageSlidesPage from './pages/admin/ManageSlidesPage';
+import MembersPage from './pages/MembersPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="/donation" element={<DonationPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/members" element={<MembersPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Route>
           <Route path="/admin" element={<AdminLayout />}>
