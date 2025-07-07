@@ -7,31 +7,31 @@ import { toast } from 'react-hot-toast';
 // Interfaces
 export interface Event {
   id: number;
-  created_at?: string;
+  created_at: string;
   title: string;
   description: string;
   date: string;
   image_url: string;
-  isPast?: boolean;
+  isPast: boolean | null;
 }
 
 export interface Slide {
   id: number;
-  created_at?: string;
+  created_at: string;
   url: string;
   caption: string;
 }
 
 export interface Member {
   id: number;
-  created_at?: string;
+  created_at: string;
   name: string;
   phone: string;
 }
 
 export interface Marquee {
     id: number;
-    created_at?: string;
+    created_at: string;
     text_content: string;
 }
 
@@ -78,16 +78,16 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const [eventsRes, marqueeRes, membersRes, slidesRes] = await Promise.all([fetchEvents, fetchMarquee, fetchMembers, fetchSlides]);
 
         if (eventsRes.error) throw eventsRes.error;
-        setEvents(eventsRes.data);
+        if (eventsRes.data) setEvents(eventsRes.data);
         
         if (marqueeRes.error) throw marqueeRes.error;
-        setMarqueeText(marqueeRes.data);
+        if (marqueeRes.data) setMarqueeText(marqueeRes.data);
         
         if (membersRes.error) throw membersRes.error;
-        setMembers(membersRes.data);
+        if (membersRes.data) setMembers(membersRes.data);
 
         if (slidesRes.error) throw slidesRes.error;
-        setSlides(slidesRes.data);
+        if (slidesRes.data) setSlides(slidesRes.data);
     } catch (error: any) {
         toast.error(`Error fetching data: ${error.message}`);
     } finally {
@@ -124,7 +124,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   // Event methods
   const addEvent = async (event: Omit<Event, 'id' | 'created_at'>) => {
-    const { error } = await supabase.from('events').insert(event);
+    const { error } = await supabase.from('events').insert([event]);
     if (error) throw error;
     await fetchData();
   };
@@ -141,11 +141,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   // Member methods
   const addMember = async (member: Omit<Member, 'id' | 'created_at'>) => {
-    const { error } = await supabase.from('members').insert(member);
+    const { error } = await supabase.from('members').insert([member]);
     if (error) throw error;
     await fetchData();
   };
-  const updateMember = async (id: number, member: Omit<Member, 'id'| 'created_at'>) => {
+  const updateMember = async (id: number, member: Omit<Member, 'id' | 'created_at'>) => {
     const { error } = await supabase.from('members').update(member).eq('id', id);
     if (error) throw error;
     await fetchData();
@@ -158,11 +158,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   // Slide methods
   const addSlide = async (slide: Omit<Slide, 'id'| 'created_at'>) => {
-    const { error } = await supabase.from('slides').insert(slide);
+    const { error } = await supabase.from('slides').insert([slide]);
     if (error) throw error;
     await fetchData();
   };
-  const updateSlide = async (id: number, slide: Omit<Slide, 'id'| 'created_at'>) => {
+  const updateSlide = async (id: number, slide: Omit<Slide, 'id' | 'created_at'>) => {
     const { error } = await supabase.from('slides').update(slide).eq('id', id);
     if (error) throw error;
     await fetchData();
