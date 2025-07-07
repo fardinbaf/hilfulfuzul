@@ -12,11 +12,15 @@ import ManageMarqueePage from './pages/admin/ManageMarqueePage';
 import ManageMembersPage from './pages/admin/ManageMembersPage';
 import ManageSlidesPage from './pages/admin/ManageSlidesPage';
 import MembersPage from './pages/MembersPage';
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <DataProvider>
       <Router>
+        <Toaster position="top-center" reverseOrder={false} />
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
@@ -25,12 +29,17 @@ function App() {
             <Route path="/members" element={<MembersPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Route>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboardPage />} />
-            <Route path="events" element={<ManageEventsPage />} />
-            <Route path="marquee" element={<ManageMarqueePage />} />
-            <Route path="members" element={<ManageMembersPage />} />
-            <Route path="slides" element={<ManageSlidesPage />} />
+          
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="events" element={<ManageEventsPage />} />
+              <Route path="marquee" element={<ManageMarqueePage />} />
+              <Route path="members" element={<ManageMembersPage />} />
+              <Route path="slides" element={<ManageSlidesPage />} />
+            </Route>
           </Route>
         </Routes>
       </Router>
