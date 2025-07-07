@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Phone, Mail, MapPin, Send } from 'lucide-react';
+import emailjs from '@emailjs/browser';
+import { toast } from 'react-hot-toast';
 
 const ContactPage = () => {
   useEffect(() => {
@@ -7,46 +9,39 @@ const ContactPage = () => {
     document.title = "হিলফুল ফুজুল সংঘ - Contact Us";
   }, []);
 
-  const [formValues, setFormValues] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: ''
-  });
-  
+  const form = useRef<HTMLFormElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormValues(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.current) return;
+    
+    const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+    if (!serviceID || !templateID || !publicKey) {
+        toast.error("Contact form is not configured correctly.");
+        console.error("EmailJS environment variables are missing in .env file.");
+        return;
+    }
+
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      
-      // Reset form after success
-      setFormValues({
-        name: '',
-        email: '',
-        phone: '',
-        message: ''
+    emailjs.sendForm(serviceID, templateID, form.current, publicKey)
+      .then(() => {
+          setSubmitSuccess(true);
+          form.current?.reset();
+          setTimeout(() => setSubmitSuccess(false), 4000);
+      })
+      .catch((error) => {
+          toast.error('Failed to send message. Please try again.');
+          console.error('EmailJS Error:', error);
+      })
+      .finally(() => {
+          setIsSubmitting(false);
       });
-      
-      // Reset success state after 3 seconds
-      setTimeout(() => {
-        setSubmitSuccess(false);
-      }, 3000);
-    }, 1500);
   };
 
   return (
@@ -120,7 +115,7 @@ const ContactPage = () => {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form ref={form} onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
                       Your Name
@@ -129,8 +124,6 @@ const ContactPage = () => {
                       type="text"
                       id="name"
                       name="name"
-                      value={formValues.name}
-                      onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       placeholder="Enter your full name"
                       required
@@ -145,8 +138,6 @@ const ContactPage = () => {
                       type="email"
                       id="email"
                       name="email"
-                      value={formValues.email}
-                      onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       placeholder="Enter your email address"
                       required
@@ -161,8 +152,6 @@ const ContactPage = () => {
                       type="tel"
                       id="phone"
                       name="phone"
-                      value={formValues.phone}
-                      onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       placeholder="Enter your phone number"
                     />
@@ -175,8 +164,6 @@ const ContactPage = () => {
                     <textarea
                       id="message"
                       name="message"
-                      value={formValues.message}
-                      onChange={handleInputChange}
                       rows={5}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       placeholder="How can we help you?"
