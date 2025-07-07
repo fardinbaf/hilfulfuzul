@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useData, Event } from '../../context/DataContext';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+
+type EventFormData = Omit<Event, 'id' | 'created_at'>;
 
 const ManageEventsPage = () => {
-  const { events, setEvents } = useData();
+  const { events, addEvent, updateEvent, deleteEvent } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
 
@@ -17,19 +20,28 @@ const ManageEventsPage = () => {
     setCurrentEvent(null);
   };
 
-  const handleSave = (eventData: Omit<Event, 'id'>) => {
-    if (currentEvent) {
-      setEvents(events.map(e => e.id === currentEvent.id ? { ...e, ...eventData } : e));
-    } else {
-      const newEvent: Event = { ...eventData, id: Date.now() };
-      setEvents([...events, newEvent]);
-    }
-    closeModal();
+  const handleSave = async (eventData: EventFormData) => {
+    const promise = currentEvent
+      ? updateEvent(currentEvent.id, eventData)
+      : addEvent(eventData);
+
+    toast.promise(promise, {
+      loading: 'Saving event...',
+      success: `Event ${currentEvent ? 'updated' : 'added'} successfully!`,
+      error: `Failed to save event.`,
+    });
+    
+    promise.then(closeModal).catch(() => {});
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
-      setEvents(events.filter(e => e.id !== id));
+      const promise = deleteEvent(id);
+      toast.promise(promise, {
+        loading: 'Deleting event...',
+        success: 'Event deleted successfully!',
+        error: 'Failed to delete event.',
+      });
     }
   };
 
@@ -81,8 +93,8 @@ const ManageEventsPage = () => {
   );
 };
 
-const EventModal = ({ event, onSave, onClose }: { event: Event | null, onSave: (data: Omit<Event, 'id'>) => void, onClose: () => void }) => {
-    const [formData, setFormData] = useState({
+const EventModal = ({ event, onSave, onClose }: { event: Event | null, onSave: (data: EventFormData) => void, onClose: () => void }) => {
+    const [formData, setFormData] = useState<EventFormData>({
         title: event?.title || '',
         description: event?.description || '',
         date: event?.date || '',
