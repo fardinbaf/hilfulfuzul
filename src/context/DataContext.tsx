@@ -83,6 +83,15 @@ const initialMembers: Member[] = [
   { id: 1, name: 'Fardin Islam', phone: '+8801...'},
   { id: 2, name: 'Md Shohag Hossain', phone: '+8801...'},
   { id: 3, name: 'Md Juel Hossain', phone: '+8801...'},
+  { id: 4, name: 'Md Nahid Hossain', phone: '+8801...'},
+  { id: 5, name: 'Md A. Ahad', phone: '+8801...'},
+  { id: 6, name: 'Saimon Siddique', phone: '+8801...'},
+  { id: 7, name: 'Abu Sufian', phone: '+8801...'},
+  { id: 8, name: 'Nayeem Islam', phone: '+8801...'},
+  { id: 9, name: 'Al Amin Hossain', phone: '+8801...'},
+  { id: 10, name: 'Hridoy Ahmed', phone: '+8801...'},
+  { id: 11, name: 'Sakib Al Hasan', phone: '+8801...'},
+  { id: 12, name: 'Mushfiqur Rahim', phone: '+8801...'},
 ];
 
 
