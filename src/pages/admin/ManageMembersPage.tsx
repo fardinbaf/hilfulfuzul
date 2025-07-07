@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useData, Member } from '../../context/DataContext';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+
+type MemberFormData = Omit<Member, 'id' | 'created_at'>;
 
 const ManageMembersPage = () => {
-  const { members, setMembers } = useData();
+  const { members, addMember, updateMember, deleteMember } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
 
@@ -17,19 +20,28 @@ const ManageMembersPage = () => {
     setCurrentMember(null);
   };
 
-  const handleSave = (memberData: Omit<Member, 'id'>) => {
-    if (currentMember) {
-      setMembers(members.map(m => m.id === currentMember.id ? { ...m, ...memberData } : m));
-    } else {
-      const newMember: Member = { ...memberData, id: Date.now() };
-      setMembers([...members, newMember]);
-    }
-    closeModal();
+  const handleSave = async (memberData: MemberFormData) => {
+    const promise = currentMember
+      ? updateMember(currentMember.id, memberData)
+      : addMember(memberData);
+    
+    toast.promise(promise, {
+      loading: 'Saving member...',
+      success: `Member ${currentMember ? 'updated' : 'added'} successfully!`,
+      error: `Failed to save member.`,
+    });
+    
+    promise.then(closeModal).catch(() => {});
   };
 
   const handleDelete = (id: number) => {
     if (window.confirm('Are you sure you want to delete this member?')) {
-      setMembers(members.filter(m => m.id !== id));
+      const promise = deleteMember(id);
+      toast.promise(promise, {
+        loading: 'Deleting member...',
+        success: 'Member deleted successfully!',
+        error: 'Failed to delete member.',
+      });
     }
   };
 
@@ -72,8 +84,8 @@ const ManageMembersPage = () => {
   );
 };
 
-const MemberModal = ({ member, onSave, onClose }: { member: Member | null, onSave: (data: Omit<Member, 'id'>) => void, onClose: () => void }) => {
-    const [formData, setFormData] = useState({
+const MemberModal = ({ member, onSave, onClose }: { member: Member | null, onSave: (data: MemberFormData) => void, onClose: () => void }) => {
+    const [formData, setFormData] = useState<MemberFormData>({
         name: member?.name || '',
         phone: member?.phone || '',
     });
