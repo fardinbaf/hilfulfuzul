@@ -11,16 +11,14 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 10);
     };
 
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Set initial scroll state on mount and route change
+
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   const isTransparent = isHomePage && !isScrolled;
 
@@ -32,10 +30,18 @@ const Navbar = () => {
 
   const desktopLinkClasses = ({ isActive }: { isActive: boolean }) => {
     const baseClasses = 'font-medium transition-colors duration-200';
-    if (isActive) {
-      return `${baseClasses} ${isTransparent ? 'text-emerald-300' : 'text-emerald-600'}`;
+    
+    if (isTransparent) {
+      // Styles for transparent navbar (homepage top)
+      return isActive
+        ? `${baseClasses} text-emerald-300`
+        : `${baseClasses} text-white hover:text-gray-200`;
+    } else {
+      // Styles for opaque navbar (scrolled or on other pages)
+      return isActive
+        ? `${baseClasses} text-emerald-600`
+        : `${baseClasses} text-gray-800 hover:text-emerald-600`;
     }
-    return `${baseClasses} ${isTransparent ? 'text-white hover:text-gray-200' : 'text-gray-800 hover:text-emerald-600'}`;
   };
 
   const mobileLinkClasses = ({ isActive }: { isActive: boolean }) => {
@@ -65,7 +71,7 @@ const Navbar = () => {
         
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-8">
-          <NavLink to="/" className={desktopLinkClasses}>Home</NavLink>
+          <NavLink to="/" end className={desktopLinkClasses}>Home</NavLink>
           <NavLink to="/donation" className={desktopLinkClasses}>Donation</NavLink>
           <NavLink to="/about" className={desktopLinkClasses}>About</NavLink>
           <NavLink to="/members" className={desktopLinkClasses}>Members</NavLink>
@@ -83,6 +89,7 @@ const Navbar = () => {
           <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-md p-4 flex flex-col space-y-4">
             <NavLink 
               to="/" 
+              end
               onClick={() => setIsOpen(false)}
               className={mobileLinkClasses}
             >
