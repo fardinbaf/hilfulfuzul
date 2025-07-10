@@ -72,7 +72,7 @@ const Navbar = () => {
           <NavLink to="/contact" className={desktopLinkClasses}>Contact</NavLink>
           <NavLink 
             to="/donation" 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-md duration-300"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-md transition-colors duration-300"
           >
             Donate Now
           </NavLink>
