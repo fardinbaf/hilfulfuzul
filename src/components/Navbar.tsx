@@ -30,18 +30,10 @@ const Navbar = () => {
 
   const desktopLinkClasses = ({ isActive }: { isActive: boolean }) => {
     const baseClasses = 'font-medium transition-colors duration-200';
-    
-    if (isTransparent) {
-      // Styles for transparent navbar (homepage top)
-      return isActive
-        ? `${baseClasses} text-emerald-300`
-        : `${baseClasses} text-white hover:text-gray-200`;
-    } else {
-      // Styles for opaque navbar (scrolled or on other pages)
-      return isActive
-        ? `${baseClasses} text-emerald-600`
-        : `${baseClasses} text-gray-800 hover:text-emerald-600`;
-    }
+    // Use dark text colors for links regardless of navbar background for better visibility.
+    return isActive
+      ? `${baseClasses} text-emerald-600`
+      : `${baseClasses} text-gray-800 hover:text-emerald-600`;
   };
 
   const mobileLinkClasses = ({ isActive }: { isActive: boolean }) => {
@@ -57,13 +49,13 @@ const Navbar = () => {
       <div className="container mx-auto px-4 flex justify-between items-center">
         <NavLink to="/" className="flex items-center space-x-2">
           <Logo />
-          <span className={`font-semibold text-xl transition-colors duration-300 ${isTransparent ? 'text-white' : 'text-gray-900'}`}>হিলফুল ফুজুল সংঘ</span>
+          <span className={`font-semibold text-xl transition-colors duration-300 text-gray-900`}>হিলফুল ফুজুল সংঘ</span>
         </NavLink>
         
         {/* Mobile menu button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`lg:hidden focus:outline-none transition-colors duration-300 ${isTransparent ? 'text-white' : 'text-gray-800'}`}
+          className={`lg:hidden focus:outline-none transition-colors duration-300 text-gray-800`}
           aria-label="Toggle menu"
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
