@@ -73,8 +73,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
         if (slidesRes.error) throw slidesRes.error;
         if (slidesRes.data) setSlides(slidesRes.data);
-    } catch (error: any) {
-        toast.error(`Error fetching data: ${error.message}`);
+    } catch (error: unknown) {
+        const err = error as Error;
+        toast.error(`Error fetching data: ${err.message}`);
     } finally {
         setIsLoading(false);
     }
