@@ -81,7 +81,7 @@ const Footer = () => {
               <li className="flex items-start space-x-3">
                 <MapPin size={18} className="text-emerald-500 mt-0.5" />
                 <span className="text-gray-400">
-                  123 Main Street, Dhaka, Bangladesh
+                  Shaheed Nagar, Jashore, Bangladesh
                 </span>
               </li>
             </ul>
