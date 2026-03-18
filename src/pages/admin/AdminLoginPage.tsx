@@ -27,8 +27,9 @@ const AdminLoginPage = () => {
       await login(email, password);
       toast.success('Logged in successfully!');
       navigate(from, { replace: true });
-    } catch (error: any) {
-      toast.error(error.message || 'Incorrect email or password.');
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message || 'Incorrect email or password.');
       setPassword('');
     } finally {
         setIsLoading(false);
