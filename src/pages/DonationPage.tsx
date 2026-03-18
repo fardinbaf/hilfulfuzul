@@ -87,7 +87,7 @@ const DonationPage = () => {
                     <Phone className="w-5 h-5 text-pink-600 mt-1" />
                     <div>
                       <p className="font-medium text-gray-800">Account Number</p>
-                      <p className="text-gray-600"><b>01909-912916</b></p>
+                      <p className="text-gray-600"><b>0187-2296477</b></p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
