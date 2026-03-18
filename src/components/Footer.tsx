@@ -72,7 +72,7 @@ const Footer = () => {
               </li>
               <li className="flex items-start space-x-3">
                 <Mail size={18} className="text-emerald-500 mt-0.5" />
-                <span className="text-gray-400">ahadahmed5363@gmail.com</span>
+                <span className="text-gray-400">+880 1872-296477</span>
               </li>
               <li className="flex items-start space-x-3">
                 <MessageCircleHeart  size={18} className="text-emerald-500 mt-0.5" />
