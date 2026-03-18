@@ -67,6 +67,7 @@ const ContactPage = () => {
               <h3 className="text-xl font-bold text-gray-800 mb-2">Phone</h3>
               
               <p className="text-gray-600">+880 9696-290209</p>
+              <p className="text-gray-600">+880 1872-296477</p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
@@ -82,8 +83,8 @@ const ContactPage = () => {
                 <MapPin className="h-8 w-8 text-emerald-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Address</h3>
-              <p className="text-gray-600">123 Main Street, Mirpur</p>
-              <p className="text-gray-600">Dhaka, Bangladesh</p>
+              <p className="text-gray-600">Shaheed Nagar, Sadar</p>
+              <p className="text-gray-600">Jashore, Bangladesh</p>
             </div>
           </div>
           
