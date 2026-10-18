@@ -1,9 +1,16 @@
-# .github/workflows/keep-alive.yml
+name: Supabase Keep-Alive
+
 on:
   schedule:
     - cron: '0 0 */3 * *'   # every 3 days
+  workflow_dispatch:        # Allows you to click "Run workflow" manually to test it
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - run: curl https://wycghtsjllkzwejjljtq.supabase.co/rest/v1/ -H "apikey: YOUR_ANON_KEY"
+      - name: Ping Supabase API
+        run: |
+          curl -f "https://bcyzfmvztffqdclmxnix.supabase.co/rest/v1/" \
+          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
